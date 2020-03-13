@@ -1,0 +1,203 @@
+openapi: 3.0.1
+info:
+  title: Sample API
+  version: 0.1.0
+  contact:
+    name: Vlad Carcu
+    email: vlad.carcu@softvision.com
+  description: Sample API
+servers:
+  - url: http://localhost:{port}
+    description: local environment
+    variables:
+      port:
+        default: '8080'
+  - url: https://devserver.domain.com/{custom-base-path}
+    description: dev environment
+    variables:
+      custom-base-path:
+        default: 'sample'
+tags:
+  - name: student
+    description: Student resource related endpoints
+paths:
+  /student:
+    get:
+      tags:
+        - student
+      summary: get all students
+      description: returns a list of all the students, without any filtering
+      operationId: getStudents
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - student
+      summary: add a new student
+      description: adds a new student and returns it
+      operationId: addStudent
+      requestBody:
+        description: The data of the student to insert. Only the name is important. The joinDate and id will be generated automatically
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentDTO'
+            example:
+              name: Jane Doe
+      responses:
+        '200':
+          description: the created student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags:
+        - student
+      summary: update an existing student
+      description: updates the name of an existing student and returns it
+      operationId: updateStudent
+      requestBody:
+        description: The data of the student to update. Only the name is important. The joinDate and id can't be changed
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentDTO'
+            example:
+              name: Jane Doe
+              id: 3
+      responses:
+        '200':
+          description: the created student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /student/{id}:
+    get:
+      tags:
+        - student
+      summary: get a student
+      description: returns the details for a student, based on id
+      operationId: getStudent
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - student
+      summary: removes a student
+      description: deletes a student identified by id
+      operationId: removeStudent
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: success
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  responses:
+    Unauthorized:
+      description: unauthorized
+    BadRequest:
+      description: bad request
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ValidationDTO'
+    ServerError:
+      description: internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+  schemas:
+    ValidationDTO:
+      type: object
+      properties:
+        code:
+          type: string
+        field:
+          type: string
+        description:
+          type: string
+    ErrorDTO:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    StudentDTO:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: id of the student
+        name:
+          type: string
+          example: Vlad Carcu
+          description: full name of the student
+        joinDate:
+          type: string
+          format: date
+          description: the day on which the student was created
